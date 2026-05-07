@@ -1,5 +1,6 @@
 package com.zhei.search_arena.core.di
 import androidx.lifecycle.ViewModelProvider
+import com.zhei.search_arena.feature_inital_profile.presentation.CreateProfileFactory
 import com.zhei.search_arena.feature_select_rol.presentation.SelectRolFactory
 import com.zhei.search_arena.feature_select_rol.presentation.SelectRolViewModel
 
@@ -21,5 +22,7 @@ import com.zhei.search_arena.feature_select_rol.presentation.SelectRolViewModel
  * [SelectRolViewModel] para la feature de selección de rol.
  */
 data class SearchArenaDeps (
-    val depSA1: SelectRolFactory
+    val depSA1: SelectRolFactory,
+    val depSA2: CreateProfileFactory
+
 )

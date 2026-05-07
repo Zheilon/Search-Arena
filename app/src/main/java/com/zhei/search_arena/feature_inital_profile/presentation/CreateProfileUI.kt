@@ -38,10 +38,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zhei.search_arena.core.common.ui.DEVICE_BOTTOM_PADDING
 import com.zhei.search_arena.core.common.ui.HEIGHT_DP_DEVICE
 import com.zhei.search_arena.core.common.ui.UiActions
+import com.zhei.search_arena.core.di.LocalDeps
 
 
 @Preview
-@Composable private fun prev() {
+@Composable private fun Prev() {
     SetInitProfileUI()
 }
 

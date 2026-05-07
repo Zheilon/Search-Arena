@@ -1,5 +1,6 @@
 package com.zhei.search_arena.core.di
 import android.content.Context
+import com.zhei.search_arena.feature_inital_profile.presentation.CreateProfileFactory
 import com.zhei.search_arena.feature_select_rol.presentation.SelectRolFactory
 
 
@@ -22,8 +23,10 @@ fun depsContainer(context: Context): SearchArenaDeps {
 
     // * ---- Carga de factories -------------------------------- *
     val selectRolFact = SelectRolFactory()
+    val createProfileFact = CreateProfileFactory()
 
     return SearchArenaDeps(
-        depSA1 = selectRolFact
+        depSA1 = selectRolFact,
+        depSA2 = createProfileFact
     )
 }
