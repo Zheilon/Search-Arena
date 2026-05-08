@@ -38,16 +38,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zhei.search_arena.core.common.ui.DEVICE_BOTTOM_PADDING
 import com.zhei.search_arena.core.common.ui.HEIGHT_DP_DEVICE
 import com.zhei.search_arena.core.common.ui.UiActions
-import com.zhei.search_arena.core.di.LocalDeps
 
 
 @Preview
 @Composable private fun Prev() {
-    SetInitProfileUI()
+    CreateProfileUI()
 }
 
 
-@Composable fun SetInitProfileUI(
+@Composable fun CreateProfileUI(
     createProfileVM: CreateProfileVM = viewModel()
 ) {
 
@@ -204,9 +203,7 @@ import com.zhei.search_arena.core.di.LocalDeps
     ) {
 
         Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
+            modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Yellow,
                 disabledContainerColor = Color.Black

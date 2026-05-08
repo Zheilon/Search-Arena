@@ -1,10 +1,19 @@
 package com.zhei.search_arena.feature_inital_profile.presentation
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.zhei.search_arena.feature_inital_profile.domain.model.Player
+import com.zhei.search_arena.feature_inital_profile.domain.repository.ICreateProfile
+import com.zhei.search_arena.feature_inital_profile.domain.usecases.UseCaseCreatePlayer
+import kotlinx.coroutines.launch
 
-class CreateProfileVM: ViewModel() {
+// ¿Por qué ICreateProfile, en ves de la Clase CreateProfileRepository()?
+// Porque el ViewModel debe depender de abstracciones y no de implementaciones concretas
+
+class CreateProfileVM(
+    private val useCaseCreatePlayer: UseCaseCreatePlayer
+): ViewModel() {
 
     private val nameClass = CreateProfileVM::class.simpleName.toString()
 
@@ -31,8 +40,11 @@ class CreateProfileVM: ViewModel() {
      * los requerimientos necesarios para enviarla.
      * */
     fun send() {
-        if (readyToSend()) {
-            Log.e(nameClass, "¡Información enviada!")
+        viewModelScope.launch {
+            if (readyToSend()) {
+                useCaseCreatePlayer(_text.value)
+                setText("")
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.zhei.search_arena.core.di
 import android.content.Context
+import com.zhei.search_arena.feature_inital_profile.data.repository.CreateProfileRepository
+import com.zhei.search_arena.feature_inital_profile.domain.usecases.UseCaseCreatePlayer
 import com.zhei.search_arena.feature_inital_profile.presentation.CreateProfileFactory
 import com.zhei.search_arena.feature_select_rol.presentation.SelectRolFactory
 
@@ -21,9 +23,18 @@ import com.zhei.search_arena.feature_select_rol.presentation.SelectRolFactory
  */
 fun depsContainer(context: Context): SearchArenaDeps {
 
+    // * ---- Carga de Repositorios -------------------------------- *
+    val createProfileRepo = CreateProfileRepository()
+
+    // * ---- Carga de Use Cases -------------------------------- *
+    val useCaseCreatePlayer = UseCaseCreatePlayer(createProfileRepo = createProfileRepo)
+
     // * ---- Carga de factories -------------------------------- *
     val selectRolFact = SelectRolFactory()
-    val createProfileFact = CreateProfileFactory()
+    val createProfileFact = CreateProfileFactory(
+        createProfileRepository = createProfileRepo,
+        createUserID = useCaseCreatePlayer
+    )
 
     return SearchArenaDeps(
         depSA1 = selectRolFact,
