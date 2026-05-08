@@ -1,8 +1,7 @@
 package com.zhei.search_arena.core.di
-import androidx.lifecycle.ViewModelProvider
-import com.zhei.search_arena.feature_inital_profile.presentation.CreateProfileFactory
-import com.zhei.search_arena.feature_select_rol.presentation.SelectRolFactory
-import com.zhei.search_arena.feature_select_rol.presentation.SelectRolViewModel
+import com.zhei.search_arena.features.create_profile.presentation.CreateProfileFactory
+import com.zhei.search_arena.features.main_arena.presentation.MainArenaFactory
+import com.zhei.search_arena.features.main_arena.presentation.MainArenaVM
 
 
 /**
@@ -19,10 +18,10 @@ import com.zhei.search_arena.feature_select_rol.presentation.SelectRolViewModel
  * incluir nuevas dependencias compartidas entre features.
  *
  * @property depSA1 Factory encargada de crear instancias del
- * [SelectRolViewModel] para la feature de selección de rol.
+ * [MainArenaVM] para la feature de selección de rol.
  */
 data class SearchArenaDeps (
-    val depSA1: SelectRolFactory,
+    val depSA1: MainArenaFactory,
     val depSA2: CreateProfileFactory
 
 )

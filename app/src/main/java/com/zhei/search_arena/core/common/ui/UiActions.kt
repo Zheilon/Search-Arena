@@ -38,7 +38,7 @@ class UiActions {
      * */
     fun safeClick(lastClickTime: Long, action: (Long) -> Unit) {
         val now = System.currentTimeMillis()
-        if (now - lastClickTime > 1000L) { action(now) }
+        if (now - lastClickTime > 1500L) { action(now) }
     }
 }
 

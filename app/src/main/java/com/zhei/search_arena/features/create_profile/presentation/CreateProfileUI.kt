@@ -1,6 +1,8 @@
-package com.zhei.search_arena.feature_inital_profile.presentation
+package com.zhei.search_arena.features.create_profile.presentation
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,38 +25,45 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zhei.search_arena.core.common.ui.DEVICE_BOTTOM_PADDING
 import com.zhei.search_arena.core.common.ui.HEIGHT_DP_DEVICE
 import com.zhei.search_arena.core.common.ui.UiActions
-
-
-@Preview
-@Composable private fun Prev() {
-    CreateProfileUI()
-}
+import com.zhei.search_arena.core.di.LocalDeps
 
 
 @Composable fun CreateProfileUI(
-    createProfileVM: CreateProfileVM = viewModel()
+    createProfileVM: CreateProfileVM = viewModel(factory = LocalDeps.current.depSA2),
+    navigate: () -> Unit
 ) {
+    val focus = LocalFocusManager.current
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color(0xFFA7B0FF))
-            .padding(bottom = DEVICE_BOTTOM_PADDING()),
+            .padding(bottom = DEVICE_BOTTOM_PADDING())
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = { focus.clearFocus() }
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -67,7 +76,7 @@ import com.zhei.search_arena.core.common.ui.UiActions
 
         item { Spacer(modifier = Modifier.height(25.dp)) }
 
-        item { ButtonToSavePlayer(vm = createProfileVM) }
+        item { ButtonToSavePlayer(vm = createProfileVM, navigate = { navigate() }) }
     }
 }
 
@@ -164,7 +173,7 @@ import com.zhei.search_arena.core.common.ui.UiActions
 ) {
 
     TextField(
-        value = vm.text.value,
+        value = vm.name.value,
         onValueChange = { vm.setText(it) },
         modifier = Modifier
             .fillMaxWidth()
@@ -182,10 +191,17 @@ import com.zhei.search_arena.core.common.ui.UiActions
 
 
 @Composable private fun ButtonToSavePlayer(
-    vm: CreateProfileVM
+    vm: CreateProfileVM,
+    navigate: () -> Unit
 ) {
 
+    val succes by vm.success
+    LaunchedEffect(succes) { if (succes) navigate() }
+
+    val focusCursor = LocalFocusManager.current
     val shape = RoundedCornerShape(15.dp)
+
+    var buttonPressed by remember { mutableStateOf(false) }
 
     // val inteactionSource = remember { MutableInteractionSource() }
     // val isPressed by inteactionSource.collectIsPressedAsState()
@@ -203,7 +219,9 @@ import com.zhei.search_arena.core.common.ui.UiActions
     ) {
 
         Button(
-            modifier = Modifier.fillMaxWidth().height(50.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Yellow,
                 disabledContainerColor = Color.Black
@@ -213,14 +231,17 @@ import com.zhei.search_arena.core.common.ui.UiActions
                 UiActions().safeClick(lastClick) {
                     lastClick = it // Despues de esta linea se codifica!
                     /* Lógica */
+                    if (vm.name.value.isNotEmpty()) buttonPressed = !buttonPressed
+                    focusCursor.clearFocus()
                     vm.send()
                 }
             }
         ) {
 
             Text(
-                text = "¡Ingresa!",
+                text = if (!buttonPressed) "¡Guardar!" else "¡Guardando Información!",
                 color = Color.Black,
+                fontWeight = FontWeight.ExtraBold
             )
         }
     }
