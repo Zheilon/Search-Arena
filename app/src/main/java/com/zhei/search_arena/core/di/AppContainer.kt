@@ -1,8 +1,11 @@
 package com.zhei.search_arena.core.di
 import android.content.Context
 import com.zhei.search_arena.features.create_profile.data.remote.repository.CreateProfileRepository
+import com.zhei.search_arena.features.create_profile.data.remote.repository.PlayerSharedPrefsSessionRepository
 import com.zhei.search_arena.features.create_profile.domain.usecases.UseCaseCreatePlayer
 import com.zhei.search_arena.features.create_profile.presentation.CreateProfileFactory
+import com.zhei.search_arena.features.main_arena.data.repository.MainArenaRemoteRepository
+import com.zhei.search_arena.features.main_arena.domain.usecases.UseCaseGetRemotePlayer
 import com.zhei.search_arena.features.main_arena.presentation.MainArenaFactory
 
 
@@ -25,15 +28,16 @@ fun depsContainer(context: Context): SearchArenaDeps {
 
     // * ---- Carga de Repositorios -------------------------------- *
     val createProfileRepo = CreateProfileRepository()
+    val playerSessionRepo = PlayerSharedPrefsSessionRepository(context)
+    val mainArenaRepo = MainArenaRemoteRepository()
 
     // * ---- Carga de Use Cases -------------------------------- *
-    val useCaseCreatePlayer = UseCaseCreatePlayer(createProfileRepo = createProfileRepo)
+    val useCaseCreatePlayer = UseCaseCreatePlayer(playerSessionRepo, createProfileRepo)
+    val useCaseGetRemotePlayer = UseCaseGetRemotePlayer(mainArenaRepo, playerSessionRepo)
 
     // * ---- Carga de factories -------------------------------- *
-    val mainArenaFact = MainArenaFactory()
-    val createProfileFact = CreateProfileFactory(
-        createUserID = useCaseCreatePlayer
-    )
+    val mainArenaFact = MainArenaFactory(useCaseGetRemotePlayer)
+    val createProfileFact = CreateProfileFactory(useCaseCreatePlayer)
 
     return SearchArenaDeps(
         depSA1 = mainArenaFact,

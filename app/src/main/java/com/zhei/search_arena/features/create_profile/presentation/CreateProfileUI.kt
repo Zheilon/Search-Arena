@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zhei.search_arena.core.MyFont
 import com.zhei.search_arena.core.common.ui.DEVICE_BOTTOM_PADDING
 import com.zhei.search_arena.core.common.ui.HEIGHT_DP_DEVICE
 import com.zhei.search_arena.core.common.ui.UiActions
@@ -116,6 +118,7 @@ import com.zhei.search_arena.core.di.LocalDeps
     Text(
         text = "Search\nArena",
         color = Color(0xFF000000),
+        fontFamily = MyFont.jetBrainsMonoMedium,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
         fontSize = 35.sp,
@@ -144,9 +147,10 @@ import com.zhei.search_arena.core.di.LocalDeps
     ) {
 
         Text(
-            text = "Ingresa tu nombre de ( Jugador )",
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
+            text = "Ingresa tu nombre de (Jugador)",
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold,
+            fontFamily = MyFont.jetBrainsMonoMedium
         )
 
         Row (
@@ -179,6 +183,8 @@ import com.zhei.search_arena.core.di.LocalDeps
             .fillMaxWidth()
             .shadow(8.dp, shape = RoundedCornerShape(30.dp)),
         colors = TextFieldDefaults.colors(
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             focusedContainerColor = Color.White,
@@ -219,12 +225,12 @@ import com.zhei.search_arena.core.di.LocalDeps
     ) {
 
         Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
+            modifier = Modifier.wrapContentSize(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Yellow,
-                disabledContainerColor = Color.Black
+                contentColor = if (!buttonPressed) Color.Black else Color.White,
+                containerColor = if (!buttonPressed) Color.Yellow else Color.Red,
+                disabledContainerColor = Color.Red,
+                disabledContentColor = Color.White
             ),
             shape = shape,
             onClick = {
@@ -235,13 +241,15 @@ import com.zhei.search_arena.core.di.LocalDeps
                     focusCursor.clearFocus()
                     vm.send()
                 }
-            }
+            },
+            enabled = true
         ) {
 
             Text(
-                text = if (!buttonPressed) "¡Guardar!" else "¡Guardando Información!",
-                color = Color.Black,
-                fontWeight = FontWeight.ExtraBold
+                text = if (!buttonPressed) "¡Guardar!" else "Guardando ...",
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.ExtraBold,
+                fontFamily = MyFont.jetBrainsMonoMedium
             )
         }
     }

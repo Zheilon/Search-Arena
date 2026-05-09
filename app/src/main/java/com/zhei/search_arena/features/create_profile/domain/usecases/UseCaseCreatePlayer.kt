@@ -1,11 +1,13 @@
 package com.zhei.search_arena.features.create_profile.domain.usecases
 import com.zhei.search_arena.core.domain.models.Player
 import com.zhei.search_arena.features.create_profile.domain.repository.ICreateProfile
+import com.zhei.search_arena.features.create_profile.domain.repository.IPlayerSharedPrefsSession
 import java.util.UUID
 
 // Porque el UseCase debe depender de una abstracción y no de una implementación concreta.
 
 class UseCaseCreatePlayer(
+    private val playerSessionRepo: IPlayerSharedPrefsSession,
     private val createProfileRepo: ICreateProfile
 ) {
 
@@ -20,13 +22,20 @@ class UseCaseCreatePlayer(
 
 
     suspend operator fun invoke(username: String) {
+
+        val id = genID()
+
         createProfileRepo.send(
             Player(
-                id = genID(),
+                id = id,
                 username = username,
-                matchesPlayed = 0
+                matchesPlayed = 0,
+                victories = 0,
+                level = 0
             )
         )
+
+        playerSessionRepo.save(id)
     }
 
 }

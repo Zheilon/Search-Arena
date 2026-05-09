@@ -4,5 +4,7 @@ data class Player(
     val id: String,
     val username: String,
     val matchesPlayed: Int,
+    val victories: Int,
+    val level: Int,
     val createdAt: Long = System.currentTimeMillis()
 )

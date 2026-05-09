@@ -16,4 +16,10 @@ import kotlinx.serialization.Serializable
      * */
     @Serializable data object MainArenaScene: Scenes()
 
+    @Serializable data object SoloArenaScene: Scenes()
+
+    @Serializable data object JoinToArenaScene: Scenes()
+
+    @Serializable data object CreateArenaScene: Scenes()
+
 }
