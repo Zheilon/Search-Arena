@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import com.zhei.search_arena.R
 import com.zhei.search_arena.core.MyFont
 import com.zhei.search_arena.core.common.ui.DEVICE_BOTTOM_PADDING
+import com.zhei.search_arena.core.common.ui.ResponsiveText
 import com.zhei.search_arena.core.common.ui.WIDTH_DP_DEVICE
 
 private val PADDING_UPPER_PART_FIRST = 20.dp
@@ -137,7 +138,8 @@ private val PADDING_UPPER_PART_SECOND = 20.dp
             style = TextStyle(
                 fontFamily = MyFont.jetBrainsMonoMedium,
                 brush = color,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = ResponsiveText.headline()
             ),
         )
         
@@ -156,7 +158,7 @@ private val PADDING_UPPER_PART_SECOND = 20.dp
                 fontFamily = MyFont.jetBrainsMonoMedium,
                 color = Color.Yellow,
                 fontWeight = FontWeight.Normal,
-                fontSize = 12.sp
+                fontSize = ResponsiveText.title()
             )
         }
     }
@@ -231,7 +233,7 @@ private val PADDING_UPPER_PART_SECOND = 20.dp
 
                 withStyle(
                     style = SpanStyle(
-                        fontSize = 9.sp,
+                        fontSize = ResponsiveText.caption(),
                         color = Color(0xFFe0e0e8),
                         fontFamily = FontFamily.Monospace
                     )
@@ -239,13 +241,13 @@ private val PADDING_UPPER_PART_SECOND = 20.dp
 
                 withStyle(
                     style = SpanStyle(
-                        fontSize = 11.sp,
+                        fontSize = ResponsiveText.body(),
                         color = Color.White,
                         fontFamily = MyFont.jetBrainsMonoMedium
                     )
                 ) { append(vmText) }
             },
-            lineHeight = 15.sp,
+            lineHeight = 18.sp,
             textAlign = TextAlign.Center,
             color = Color(0xFFe0e0e8),
         )
@@ -268,21 +270,21 @@ private val PADDING_UPPER_PART_SECOND = 20.dp
         CardsForJoinToPlay(
             text = "Solo",
             keyword = "S",
-            color = Color(0xFFD1A700),
+            //color = Color(0xFFD1A700),
             onSelectedMode = { onSelectedMode(it) }
         )
         
         CardsForJoinToPlay(
             text = "Crear Sala",
             keyword = "CS",
-            color = Color(0xFFFFCC00),
+            //color = Color(0xFFFFCC00),
             onSelectedMode = { onSelectedMode(it) }
         )
 
         CardsForJoinToPlay(
             text = "Unirse a Sala",
             keyword = "US",
-            color = Color(0xFFFFD52E),
+            //color = Color(0xFFFFD52E),
             onSelectedMode = { onSelectedMode(it) }
         )
     }
@@ -292,7 +294,7 @@ private val PADDING_UPPER_PART_SECOND = 20.dp
 @Composable private fun CardsForJoinToPlay(
     text: String,
     keyword: String,
-    color: Color,
+    color: Color = Color(0xFFFFD52E),
     onSelectedMode: (String) -> Unit
 ) {
 
@@ -314,8 +316,8 @@ private val PADDING_UPPER_PART_SECOND = 20.dp
 
         Text(
             text = text,
-            fontWeight = FontWeight.ExtraBold,
-            fontFamily = MyFont.jetBrainsMonoMedium
+            fontFamily = MyFont.jetBrainsMonoMedium,
+            fontSize = ResponsiveText.button()
         )
     }
 }

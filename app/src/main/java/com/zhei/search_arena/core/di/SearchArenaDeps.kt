@@ -2,6 +2,7 @@ package com.zhei.search_arena.core.di
 import com.zhei.search_arena.features.create_profile.presentation.CreateProfileFactory
 import com.zhei.search_arena.features.main_arena.presentation.MainArenaFactory
 import com.zhei.search_arena.features.main_arena.presentation.MainArenaVM
+import com.zhei.search_arena.features.solo_arena.presentation.SoloArenaFactory
 
 
 /**
@@ -22,6 +23,6 @@ import com.zhei.search_arena.features.main_arena.presentation.MainArenaVM
  */
 data class SearchArenaDeps (
     val depSA1: MainArenaFactory,
-    val depSA2: CreateProfileFactory
-
+    val depSA2: CreateProfileFactory,
+    val depSA3: SoloArenaFactory
 )

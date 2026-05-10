@@ -7,6 +7,7 @@ import com.zhei.search_arena.features.create_profile.presentation.CreateProfileF
 import com.zhei.search_arena.features.main_arena.data.repository.MainArenaRemoteRepository
 import com.zhei.search_arena.features.main_arena.domain.usecases.UseCaseGetRemotePlayer
 import com.zhei.search_arena.features.main_arena.presentation.MainArenaFactory
+import com.zhei.search_arena.features.solo_arena.presentation.SoloArenaFactory
 
 
 /**
@@ -38,9 +39,11 @@ fun depsContainer(context: Context): SearchArenaDeps {
     // * ---- Carga de factories -------------------------------- *
     val mainArenaFact = MainArenaFactory(useCaseGetRemotePlayer)
     val createProfileFact = CreateProfileFactory(useCaseCreatePlayer)
+    val soloArenaFact = SoloArenaFactory()
 
     return SearchArenaDeps(
         depSA1 = mainArenaFact,
-        depSA2 = createProfileFact
+        depSA2 = createProfileFact,
+        depSA3 = soloArenaFact
     )
 }

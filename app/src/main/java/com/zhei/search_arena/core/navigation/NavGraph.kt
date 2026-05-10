@@ -1,4 +1,5 @@
 package com.zhei.search_arena.core.navigation
+import android.transition.Scene
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
@@ -10,6 +11,7 @@ import com.zhei.search_arena.core.di.LocalDeps
 import com.zhei.search_arena.features.create_profile.presentation.CreateProfileUI
 import com.zhei.search_arena.features.main_arena.presentation.MainArenaUI
 import com.zhei.search_arena.features.main_arena.presentation.MainArenaVM
+import com.zhei.search_arena.features.solo_arena.presentation.SoloArenaUI
 
 
 @Composable fun NavGraph() {
@@ -48,6 +50,11 @@ import com.zhei.search_arena.features.main_arena.presentation.MainArenaVM
                     }
                 }
             )
+        }
+
+        composable<Scenes.SoloArenaScene> {
+
+            SoloArenaUI()
         }
     }
 

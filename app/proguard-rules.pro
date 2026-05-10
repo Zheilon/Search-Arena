@@ -121,9 +121,8 @@
 # -------------------------------------------------------------#
 # BLOQUE CLASES: MODELS O ENTITIES
 # -------------------------------------------------------------#
-#-keep class com.zhei.comifarm.data.remote.model.** { *; }
-#-keep class com.zhei.comifarm.data.local.entity.** { *; }
-#-keep class com.zhei.comifarm.domain.model.** { *; }
+-keep class com.zhei.search_arena.core.domain.models.** { *; }
+-keep class com.zhei.search_arena.core.data.models.** { *; }
 
 
 # -------------------------------------------------------------#
