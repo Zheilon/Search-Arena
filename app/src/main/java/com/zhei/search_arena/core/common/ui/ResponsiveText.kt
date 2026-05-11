@@ -4,6 +4,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
+/**
+ * Esta aplicación estará destinada para moviles unicamente
+ * nada de tablets. Por esto mismo tomo 2 tipos de medidas de
+ * telefonos.
+ * */
 object ResponsiveText {
 
     /**
@@ -61,4 +66,11 @@ object ResponsiveText {
      * */
     @Composable fun caption(): TextUnit =
         if (isSmallDevice()) 10.sp else 11.sp
+
+
+    /**
+     * Tamaño utilizado para textos cuyo tamaño es muy pequeño
+     * */
+    @Composable fun minimal(): TextUnit =
+        if (isSmallDevice()) 3.sp else 4.sp
 }

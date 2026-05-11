@@ -2,6 +2,7 @@ package com.zhei.search_arena.core.common.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import com.zhei.search_arena.core.common.ui.ResponsiveText.isSmallDevice
 
 object ResponsiveLineHeight {
 
@@ -59,5 +60,12 @@ object ResponsiveLineHeight {
     @Composable
     fun caption(): TextUnit =
         (ResponsiveText.caption().value * RELATION).sp
+
+
+    /**
+     * Tamaño utilizado para textos cuyo tamaño es muy pequeño
+     * */
+    @Composable fun minimal(): TextUnit =
+        (ResponsiveText.minimal().value * RELATION).sp
 
 }

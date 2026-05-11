@@ -1,16 +1,24 @@
 package com.zhei.search_arena.features.solo_arena.presentation
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,8 +27,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,17 +36,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,42 +58,59 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zhei.search_arena.R
 import com.zhei.search_arena.core.MyFont
 import com.zhei.search_arena.core.common.ui.DEVICE_BOTTOM_PADDING
 import com.zhei.search_arena.core.common.ui.ResponsiveLineHeight
 import com.zhei.search_arena.core.common.ui.ResponsiveText
 import com.zhei.search_arena.core.common.ui.WIDTH_DP_DEVICE
-import com.zhei.search_arena.core.di.LocalDeps
-import java.text.NumberFormat
-import java.util.Locale
+import com.zhei.search_arena.core.domain.algoritms.SearchsAlgorithms
+import com.zhei.search_arena.core.domain.algoritms.SortAlgorithms
 
 
 @Composable fun SoloArenaUI(
-    vm: SoloArenaVM = viewModel(factory = LocalDeps.current.depSA3)
+    vm: SoloArenaVM,
+    navigate: () -> Unit
 ) {
 
+    val decision by vm.decisionIsConfirmed
+    LaunchedEffect(decision) { if (decision) navigate()  }
+
     val withDataSort by vm.withSort
-    val colorHorizontalDiv = Color(0xFFffcc00).copy(alpha = 0.7f)
+    val isShowingCode by vm.isCodeShowed
+
+    val colorHorizontalDiv = Color(0xFFffcc00).copy(alpha = 0.5f)
+    val allIsReady = vm.everythingIsReady()
+
+    val cond = isShowingCode || allIsReady
 
     Box(modifier = Modifier.fillMaxSize()) {
 
         LazyColumn (
             modifier = Modifier
                 .fillMaxSize()
+                .blur(if (cond) 12.dp else 0.dp)
                 .background(color = Color(0xFF000412))
                 .statusBarsPadding()
                 .padding(bottom = DEVICE_BOTTOM_PADDING(), start = 20.dp, end = 20.dp)
@@ -123,6 +152,8 @@ import java.util.Locale
             item { QuestionSelectTheNumberIntoTheRange(vm) }
         }
 
+        CardToShowCode(vm)
+
         ArraivalCardd(vm)
     }
 
@@ -141,14 +172,7 @@ import java.util.Locale
     //  "Ternary Search"
 
     val algorithmName by vm.searchAlgo
-
-    val algorithms = remember {
-        listOf(
-            "Binary Search",
-            "Linear Search"
-        )
-    }
-
+    val algorithms = remember { SearchsAlgorithms.getNames() }
     var expanded by remember { mutableStateOf(false) }
 
     Column(
@@ -161,12 +185,22 @@ import java.util.Locale
 
         Text(
             text = "¡Selecciona tu algoritmo de búsqueda!",
-            fontWeight = FontWeight.ExtraBold,
+            fontFamily = MyFont.spaceGroteskRegular,
             color = Color(0xFFFFCC00),
             textAlign = TextAlign.Start,
             fontSize = ResponsiveText.headline(),
             lineHeight =  ResponsiveLineHeight.headline()
         )
+
+        if (vm.disableButton.value) {
+            Text(
+                text = "¡Este algoritmo requiere un ordenamiento previo obligatorio!",
+                color = Color.Red,
+                textAlign = TextAlign.Start,
+                fontSize = ResponsiveText.body(),
+                lineHeight =  ResponsiveLineHeight.body()
+            )
+        }
 
         Spacer(modifier = Modifier.height(15.dp))
 
@@ -226,6 +260,38 @@ import java.util.Locale
                 colorFilter = ColorFilter.tint(if (vm.searchAlgo.value.isNullOrEmpty()) Color.Red else Color.Green)
             )
         }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        vm.searchAlgo.value?.let {
+
+            SearchsAlgorithms.findByName(it)?.let { configs ->
+
+                Text(
+                    text = "Complejidad",
+                    fontSize = ResponsiveText.body(),
+                    lineHeight = ResponsiveLineHeight.body(),
+                    color = Color.Gray,
+                    fontFamily = MyFont.spaceGroteskRegular
+                )
+
+                Text(
+                    text = "* Mejor Caso: ${configs.bestCase}\n" +
+                            "* Promedio: ${configs.mean}\n" +
+                            "* Peor Caso: ${configs.worseCase}\n" +
+                            "* Espacio: ${configs.space}\n\n" +
+                            "* Estrategia: ${configs.strategy}",
+                    fontSize = ResponsiveText.caption(),
+                    lineHeight = ResponsiveLineHeight.caption(),
+                    color = Color.White,
+                    fontFamily = MyFont.jetBrainsMonoMedium
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                ButtonForShowCode(vm, configs.code)
+            }
+        }
     }
 }
 
@@ -237,6 +303,13 @@ import java.util.Locale
 
     val fromHeigth = 40.dp
     val fromWidth = 100.dp
+
+    // Pongo un LaunchedEffect para que no se este repitiendo cada rato
+    // esta linea de código, unicamente cuando withSortdBro
+    // Su funcionamiento es el siguiente: cuando withSortdBro estaba en
+    // (true) y vuelva a (false) entonces el text donde se pone el algoritmo
+    // de ordenamiento debe ser (null).
+    LaunchedEffect(withSortdBro) { if (!withSortdBro) vm.setSortAlgo(null) }
 
     val movement = with(LocalDensity.current) { (fromWidth - fromHeigth).toPx() }
 
@@ -256,9 +329,9 @@ import java.util.Locale
 
         Text(
             text = "¿Quieres ordenar tus datos?",
-            fontWeight = FontWeight.ExtraBold,
             color = Color(0xFFFFCC00),
             textAlign = TextAlign.Start,
+            fontFamily = MyFont.spaceGroteskRegular,
             fontSize = ResponsiveText.headline(),
             lineHeight = ResponsiveLineHeight.headline()
         )
@@ -274,18 +347,25 @@ import java.util.Locale
 
         ) {
 
-            Box(
+            Button(
+                onClick = { vm.setWithSortToggle() },
                 modifier = Modifier
                     .size(fromHeigth)
-                    .clip(shape)
-                    .background(color = Color(0xFFFFD52E), shape)
-                    .clickable { vm.setWithSort() },
-                contentAlignment = Alignment.Center
+                    .clip(shape),
+                shape = shape,
+                contentPadding = PaddingValues(0.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFFD52E),
+                    disabledContainerColor = Color(0xFFFFD52E)
+                ),
+                enabled = !vm.disableButton.value
             ) {
 
-                Image(
-                    imageVector = if (withSortdBro) Icons.Default.CheckCircle else Icons.Default.Cancel,
-                    contentDescription = null
+                Icon(
+                    imageVector = if (withSortdBro) Icons.Default.CheckCircle
+                    else Icons.Default.Cancel,
+                    contentDescription = null,
+                    tint = Color.Black
                 )
             }
         }
@@ -308,13 +388,7 @@ import java.util.Locale
 
     val algorithmName by vm.sortAlgo
 
-    val algorithms = remember {
-        listOf(
-            "Bubble Sort",
-            "Insertion Sort",
-            "Merge Sort"
-        )
-    }
+    val algorithms = remember { SortAlgorithms.getNames() }
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -328,10 +402,10 @@ import java.util.Locale
 
         Text(
             text = "¡Selecciona tu algoritmo de ordenamiento!",
-            fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFFFFCC00),
+            color = Color(0xFFFCEEBB),
             textAlign = TextAlign.Start,
             fontSize = ResponsiveText.headline(),
+            fontFamily = MyFont.spaceGroteskRegular,
             lineHeight = ResponsiveLineHeight.headline()
         )
 
@@ -349,7 +423,7 @@ import java.util.Locale
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFFFFD52E))
+                        .background(Color(0xFFFCEEBB))
                         .clickable { expanded = true }
                         .padding(start = 12.dp, end = 8.dp),
 
@@ -387,11 +461,45 @@ import java.util.Locale
 
             Spacer(modifier = Modifier.weight(1f))
 
+            val cond = vm.sortAlgo.value.isNullOrEmpty()
+
             Image(
-                imageVector = if (vm.sortAlgo.value.isNullOrEmpty()) Icons.Default.Cancel else Icons.Default.CheckCircle,
+                imageVector = if (cond) Icons.Default.Cancel else Icons.Default.CheckCircle,
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(if (vm.sortAlgo.value.isNullOrEmpty()) Color.Red else Color.Green)
+                colorFilter = ColorFilter.tint(if (cond) Color.Red else Color.Green)
             )
+        }
+
+        Spacer(modifier = Modifier.height(15.dp))
+
+        vm.sortAlgo.value?.let {
+
+            SortAlgorithms.findByName(it)?.let { configs ->
+
+                Text(
+                    text = "Complejidad",
+                    fontSize = ResponsiveText.body(),
+                    lineHeight = ResponsiveLineHeight.body(),
+                    color = Color.Gray,
+                    fontFamily = MyFont.spaceGroteskRegular
+                )
+
+                Text(
+                    text = "* Mejor Caso: ${configs.bestCase}\n" +
+                            "* Promedio: ${configs.mean}\n" +
+                            "* Peor Caso: ${configs.worseCase}\n" +
+                            "* Espacio: ${configs.space}\n\n" +
+                            "* Estrategia: ${configs.strategy}",
+                    fontSize = ResponsiveText.caption(),
+                    lineHeight = ResponsiveLineHeight.caption(),
+                    color = Color.White,
+                    fontFamily = MyFont.jetBrainsMonoMedium
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                ButtonForShowCode(vm, configs.code)
+            }
         }
     }
 }
@@ -411,8 +519,8 @@ import java.util.Locale
     ) {
 
         Text(
-            text = "¿Cuantos DÍGITOS tendra tu set de datos de prueba?",
-            fontWeight = FontWeight.ExtraBold,
+            text = "¿Cuantos dígitos tendra el número a buscar?",
+            fontFamily = MyFont.spaceGroteskRegular,
             color = Color(0xFFFFCC00),
             textAlign = TextAlign.Start,
             fontSize = ResponsiveText.headline(),
@@ -431,9 +539,11 @@ import java.util.Locale
 
         if (rangeDigits != "") {
             Text(
-                text = "Rango: $rangeDigits",
+                text = "Lista: $rangeDigits",
                 color = Color.White,
                 textAlign = TextAlign.Start,
+                fontFamily = MyFont.jetBrainsMonoMedium,
+                fontWeight = FontWeight.Normal,
                 lineHeight = ResponsiveLineHeight.caption(),
                 fontSize = ResponsiveText.caption()
             )
@@ -502,7 +612,7 @@ import java.util.Locale
 
         Text(
             text = "¡Escoge tú número a buscar dentro del rango establecido!",
-            fontWeight = FontWeight.ExtraBold,
+            fontFamily = MyFont.spaceGroteskRegular,
             color = Color(0xFFFFCC00),
             textAlign = TextAlign.Start,
             fontSize = ResponsiveText.headline(),
@@ -571,9 +681,12 @@ import java.util.Locale
 
 @Composable private fun ArraivalCardd(vm: SoloArenaVM) {
 
+    val focus = LocalFocusManager.current
 
     // BLOQUEADOR + MODAL
     if (vm.everythingIsReady()) {
+
+        focus.clearFocus()
 
         // Captura todos los clicks
         Box(
@@ -592,9 +705,7 @@ import java.util.Locale
 
             Card(
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF151515)
-                )
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF151515))
             ) {
 
                 Column(
@@ -611,22 +722,307 @@ import java.util.Locale
 
                     Spacer(modifier = Modifier.height(20.dp))
 
+                    Text(
+                        text = "Search:\n${vm.searchAlgo.value}\n\n" +
+                                "Sort:\n${vm.sortAlgo.value}\n\n" +
+                                "Digits:\n${vm.datasetDigits.value}\n\n" +
+                                "Number:\n${vm.selectedNumber.value}",
+                        color = Color.White,
+                        fontFamily = MyFont.jetBrainsMonoMedium,
+                        fontSize = ResponsiveText.caption(),
+                        lineHeight = ResponsiveLineHeight.caption()
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
 
                         Button(
-                            onClick = {}
+                            onClick = {
+                                vm.setDesicion(true)
+                            }
                         ) {
 
-                            Text("Sí")
+                            Text(
+                                text = "Sí",
+                                fontSize = ResponsiveText.button(),
+                                fontFamily = MyFont.jetBrainsMonoMedium
+                            )
                         }
 
                         OutlinedButton(
-                            onClick = {}
+                            onClick = {
+                                vm.setDesicion(false)
+                                vm.cleanAllParams()
+                            }
                         ) {
 
                             Text("No")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * Ademas esta función recibirá como parametro el código que proviene
+ * de la dataclass (AlgorithmsAtts) que probiene de los Enums bien sea,
+ * [SearchsAlgorithms] o [SortAlgorithms].
+ * */
+@Composable private fun CardToShowCode(
+    vm: SoloArenaVM
+) {
+
+    val code by vm.code
+    val brush = animatedGradientText()
+
+    // Estas variables se utilizan para hacer zoom y desplazarme en la pantalla
+    var scale by remember { mutableFloatStateOf(1f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
+
+    val transformableState = rememberTransformableState { zoomChange, panChange, _ ->
+        scale = (scale * zoomChange).coerceIn(1f, 3f)
+        offset += panChange
+    }
+
+    val styledCode = deployMyOwnEditorTextColor(code)
+
+    // BLOQUEADOR + MODAL
+    if (vm.isCodeShowed.value) {
+
+        // Captura todos los clicks
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f))
+                .transformable(transformableState)
+                .padding(20.dp)
+                .pointerInput(Unit) {
+
+                    // ¡OJO! esto debe ir primero antes de ese carechimba
+                    // awaitPointerEventScope {}, o sino no se ejecuta ni nada!!!.
+                    // + Esto me sirve para resetear el Zoom y desplazamiento de pantalla
+                    detectTapGestures(
+                        onDoubleTap = {
+                            scale = 1f
+                            offset = Offset.Zero
+                        }
+                    )
+
+                    awaitPointerEventScope {
+                        while (true) {
+                            awaitPointerEvent()
+                        }
+                    }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(2.dp, brush = brush),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF151515))
+            ) {
+
+                Column(
+                    modifier = Modifier.padding(15.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.End
+                    )  {
+
+                        Button (
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(CircleShape),
+                            contentPadding = PaddingValues(0.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Red
+                            ),
+                            onClick = {
+                                vm.setIsCodeShowed(false)
+                                vm.setCode("")
+                            }
+                        ) {
+
+                            Icon(
+                                imageVector = Icons.Default.Cancel,
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = styledCode,
+                        fontSize = ResponsiveText.minimal(),
+                        lineHeight = ResponsiveLineHeight.minimal(),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontFamily = MyFont.jetBrainsMonoMedium,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .graphicsLayer {
+                                scaleX = scale
+                                scaleY = scale
+                                translationX = offset.x
+                                translationY = offset.y
+                            }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * Esto se muestra si las variables _searchAlgo ó _sortAlgo son
+ * diferentes de nulo.
+ * */
+@Composable private fun ButtonForShowCode(
+    vm: SoloArenaVM,
+    code: String
+) {
+
+    val color = animatedGradientText()
+
+    Row (
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = Modifier
+            .clickable {
+                vm.setCode(code)
+                vm.setIsCodeShowed(true)
+            }
+            .background(color = Color.White, shape = RoundedCornerShape(20.dp))
+            .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
+    ) {
+
+        Text(
+            text = "Code",
+            fontSize = ResponsiveText.body(),
+            lineHeight = ResponsiveLineHeight.body(),
+            fontWeight = FontWeight.ExtraBold,
+        )
+
+        Icon(
+            painter = painterResource(id = R.drawable.terminalv1),
+            contentDescription = null,
+            modifier = Modifier
+                .size(40.dp)
+                .drawWithCache {
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(
+                            brush = color,
+                            // Aquí en lo último que un chimba con:
+                            // .Plus
+                            // .Screen
+                            blendMode = BlendMode.Plus
+                        )
+                    }
+                }
+        )
+    }
+}
+
+
+@Composable private fun animatedGradientText(): Brush {
+
+    val infiniteTransition = rememberInfiniteTransition(
+        label = ""
+    )
+
+    val animatedOffset by infiniteTransition.animateFloat(
+        initialValue = -900f,
+        targetValue = 900f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 6000,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = ""
+    )
+
+    return Brush.linearGradient(
+        colors = listOf(
+            Color.Black,
+            Color.Blue,
+            Color.Red,
+            Color.Magenta,
+            Color.Blue,
+            Color.Red,
+            Color.Magenta,
+            Color.Black
+        ),
+        start = Offset(animatedOffset, 0f),
+        end = Offset(animatedOffset + 900f, 0f)
+    )
+}
+
+
+@Composable private fun deployMyOwnEditorTextColor(code: String): AnnotatedString {
+
+    return remember(code) {
+
+        buildAnnotatedString {
+
+            code.split(" ").forEach { word ->
+
+                when (word) {
+
+                    "def", "return" -> {
+                        withStyle(
+                            style = SpanStyle(color = Color(0xFF569CD6))
+                        ) { append("$word ") }
+                    }
+
+                    "for", "while" -> {
+                        withStyle(
+                            style = SpanStyle(color = Color(0xFFE91E63))
+                        ) { append("$word ") }
+                    }
+
+                    "if", "elif", "else:", "in", "and", "or" -> {
+                        withStyle(
+                            style = SpanStyle(color = Color(0xFF00BCD4))
+                        ) { append("$word ") }
+                    }
+
+                    "break", "import" -> {
+                        withStyle(
+                            style = SpanStyle(color = Color(0xFF673AB7))
+                        ) { append("$word ") }
+                    }
+
+                    "=", "==", "!=", "+", "/", "//", "-", "*", "<", "<=", ">", ">=", "-=", "+=","//=" -> {
+                        withStyle(
+                            style = SpanStyle(color = Color(0xFFFF9800))
+                        ) { append("$word ") }
+                    }
+
+                    else -> {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Color(0xFFFFECA6)
+                            )
+                        ) {
+                            append("$word ")
                         }
                     }
                 }

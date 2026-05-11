@@ -12,11 +12,14 @@ import com.zhei.search_arena.features.create_profile.presentation.CreateProfileU
 import com.zhei.search_arena.features.main_arena.presentation.MainArenaUI
 import com.zhei.search_arena.features.main_arena.presentation.MainArenaVM
 import com.zhei.search_arena.features.solo_arena.presentation.SoloArenaUI
+import com.zhei.search_arena.features.solo_arena.presentation.SoloArenaVM
+import com.zhei.search_arena.features.solo_arena_load.presentation.SoloArenaLoadUI
 
 
 @Composable fun NavGraph() {
 
     val mainArenaVM = viewModel<MainArenaVM>(factory = LocalDeps.current.depSA1)
+    val soloArenaVM = viewModel<SoloArenaVM>(factory = LocalDeps.current.depSA3)
 
     val nav = rememberNavController()
 
@@ -54,7 +57,17 @@ import com.zhei.search_arena.features.solo_arena.presentation.SoloArenaUI
 
         composable<Scenes.SoloArenaScene> {
 
-            SoloArenaUI()
+            SoloArenaUI(
+                vm = soloArenaVM,
+                navigate = { nav.navigate(Scenes.SoloArenaLoadScene) { launchSingleTop = true } }
+            )
+        }
+
+        composable<Scenes.SoloArenaLoadScene> {
+
+            SoloArenaLoadUI(
+                navigation = {}
+            )
         }
     }
 

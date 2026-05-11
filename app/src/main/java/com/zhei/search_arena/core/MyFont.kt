@@ -6,5 +6,6 @@ import com.zhei.search_arena.R
 object MyFont {
 
     val jetBrainsMonoMedium = FontFamily(Font(R.font.jetbrainsmonomedium))
+    val spaceGroteskRegular = FontFamily(Font(R.font.spacegroteskregular))
 
 }

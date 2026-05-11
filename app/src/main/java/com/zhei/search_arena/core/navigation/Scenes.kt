@@ -22,4 +22,6 @@ import kotlinx.serialization.Serializable
 
     @Serializable data object CreateArenaScene: Scenes()
 
+    @Serializable data object SoloArenaLoadScene: Scenes()
+
 }
